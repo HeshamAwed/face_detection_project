@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
 
@@ -33,4 +34,59 @@ double translateY(
     default:
       return y * size.height / absoluteImageSize.height;
   }
+}
+
+double validateMetrics(double value, {DimType dimType = DimType.x}) {
+  if (dimType == DimType.x) {
+    if (value > DimConstants().maxX) {
+      value = DimConstants().maxX;
+    }
+    value = DimConstants().maxX - value;
+  } else if (dimType == DimType.y) {
+    if (value > DimConstants().maxY) {
+      value = DimConstants().maxY;
+    }
+    value = DimConstants().maxY - value;
+  } else {
+    if (value > DimConstants().maxZ) {
+      value = DimConstants().maxZ;
+    }
+    value = DimConstants().maxZ - value;
+  }
+
+  return value;
+}
+
+double translateMetricsToProgress(double value, {DimType dimType = DimType.x}) {
+  double min, max;
+  if (dimType == DimType.x) {
+    // x
+
+    min = DimConstants().minX;
+    max = DimConstants().maxX;
+  } else if (dimType == DimType.y) {
+    min = DimConstants().minY;
+    max = DimConstants().maxY;
+  } else {
+    min = DimConstants().minZ;
+    max = DimConstants().maxZ;
+  }
+  value = (value - min) / (max - min);
+
+  log("Translated value $dimType : $value ");
+  return value;
+}
+
+enum DimType { x, y, z }
+
+class DimConstants {
+  /// Constrains
+  double minX = 0; // centerlized range value 0-20
+  double maxX = 60;
+  double minY = 0;
+  double maxY = 60;
+  double minZ = 0; // centerlized range value 0-3
+  double maxZ = 20;
+
+  ///
 }

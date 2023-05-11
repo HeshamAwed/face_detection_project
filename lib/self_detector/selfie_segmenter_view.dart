@@ -19,6 +19,9 @@ class _SelfieSegmenterViewState extends State<SelfieSegmenterView> {
   bool _isBusy = false;
   CustomPaint? _customPaint;
   String? _text;
+  final ValueNotifier<double> xProgressBar = ValueNotifier(0.0),
+      zProgressBar = ValueNotifier(0.0),
+      yPropgressBar = ValueNotifier(0.0);
 
   @override
   void dispose() async {
@@ -30,6 +33,9 @@ class _SelfieSegmenterViewState extends State<SelfieSegmenterView> {
   @override
   Widget build(BuildContext context) {
     return CameraView(
+      xProgressBar: xProgressBar,
+      yProgressBar: yPropgressBar,
+      zProgressBar: zProgressBar,
       title: 'Selfie Segmenter',
       customPaint: _customPaint,
       text: _text,

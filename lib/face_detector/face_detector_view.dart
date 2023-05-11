@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 
 import '../utils/camera_view.dart';
+import '../utils/coordinates_translator.dart';
 import 'face_detector_painter.dart';
 
 class FaceDetectorView extends StatefulWidget {
@@ -26,6 +27,10 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
   CustomPaint? _customPaint;
   String? _text;
 
+  final ValueNotifier<double> xProgressBar = ValueNotifier(0.0),
+      yProgressBar = ValueNotifier(0.0),
+      zProgressBar = ValueNotifier(0.0);
+
   @override
   void dispose() {
     _canProcess = false;
@@ -42,6 +47,9 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
       onImage: (inputImage) {
         processImage(inputImage);
       },
+      xProgressBar: xProgressBar,
+      yProgressBar: yProgressBar,
+      zProgressBar: zProgressBar,
       initialDirection: CameraLensDirection.front,
     );
   }
@@ -64,6 +72,33 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
         log("face.headEulerAngleZ ${faces[0].headEulerAngleZ}", name: "dfsdf");
         log("face.headEulerAngleX ${faces[0].headEulerAngleX}");
         log("face.headEulerAngleY ${faces[0].headEulerAngleY}");
+
+        xProgressBar.value = translateMetricsToProgress(
+            validateMetrics(
+              faces[0]?.headEulerAngleX?.abs() ?? DimConstants().maxX,
+            ),
+            dimType: DimType.x);
+        yProgressBar.value = translateMetricsToProgress(
+            validateMetrics(
+                faces[0]?.headEulerAngleY?.abs() ?? DimConstants().maxY,
+                dimType: DimType.y),
+            dimType: DimType.y);
+
+        zProgressBar.value = translateMetricsToProgress(
+            validateMetrics(
+                faces[0]?.headEulerAngleZ?.abs() ?? DimConstants().maxZ,
+                dimType: DimType.z),
+            dimType: DimType.z);
+      } else {
+        xProgressBar.value = translateMetricsToProgress(
+            validateMetrics(DimConstants().maxX, dimType: DimType.x),
+            dimType: DimType.x);
+        yProgressBar.value = translateMetricsToProgress(
+            validateMetrics(DimConstants().maxY, dimType: DimType.y),
+            dimType: DimType.y);
+        zProgressBar.value = translateMetricsToProgress(
+            validateMetrics(DimConstants().maxZ, dimType: DimType.z),
+            dimType: DimType.z);
       }
       // if (faces.isNotEmpty) {
       //   final headEulerAngleY = faces[0].headEulerAngleY ?? 0.0;
@@ -85,7 +120,6 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
       //
       // }
       _customPaint = CustomPaint(painter: painter);
-
     } else {
       String text = 'Faces found: ${faces.length}\n\n';
       for (final face in faces) {
