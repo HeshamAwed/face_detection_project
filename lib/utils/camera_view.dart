@@ -18,6 +18,9 @@ class CameraView extends StatefulWidget {
       this.text,
       required this.onImage,
       this.onScreenModeChanged,
+      required this.xProgressBar,
+      required this.zProgressBar,
+      required this.yProgressBar,
       this.initialDirection = CameraLensDirection.back})
       : super(key: key);
 
@@ -27,6 +30,7 @@ class CameraView extends StatefulWidget {
   final Function(InputImage inputImage) onImage;
   final Function(ScreenMode mode)? onScreenModeChanged;
   final CameraLensDirection initialDirection;
+  final ValueNotifier<double> xProgressBar, yProgressBar, zProgressBar;
 
   @override
   State<CameraView> createState() => _CameraViewState();
@@ -166,26 +170,70 @@ class _CameraViewState extends State<CameraView> {
                   : CameraPreview(_controller!),
             ),
           ),
-          if (widget.customPaint != null) widget.customPaint!,
+
+          ///////////////////////////
           Positioned(
-            bottom: 100,
-            left: 50,
+            top: 0.15 * MediaQuery.of(context).size.height,
             right: 50,
-            child: Slider(
-              value: zoomLevel,
-              min: minZoomLevel,
-              max: maxZoomLevel,
-              onChanged: (newSliderValue) {
-                setState(() {
-                  zoomLevel = newSliderValue;
-                  _controller!.setZoomLevel(zoomLevel);
-                });
-              },
-              divisions: (maxZoomLevel - 1).toInt() < 1
-                  ? null
-                  : (maxZoomLevel - 1).toInt(),
+            left: 50,
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 0.1 * MediaQuery.of(context).size.height,
+              ),
+              child: SizedBox(
+                height: 0.8 * MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Vertical Progress bar X Dimension
+
+                    RotatedBox(
+                      quarterTurns: -1,
+                      child: SizedBox(
+                          width: 0.5 * MediaQuery.of(context).size.height,
+                          height: 6,
+                          child: LinearProgressIndicator(
+                              value: widget.xProgressBar.value,
+                              backgroundColor: Colors.blue.withOpacity(0.2),
+                              valueColor: AlwaysStoppedAnimation(
+                                widget.xProgressBar.value >= 0.9
+                                    ? Colors.green
+                                    : Colors.blue,
+                              ))),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    // Z Progress Indicator
+
+                    Center(
+                        child: Padding(
+                            padding: EdgeInsets.only(bottom: 50),
+                            child: Text(((widget?.zProgressBar?.value ?? 0) <
+                                    0.9)
+                                ? "Please be closer to the center of the screen"
+                                : ""))),
+                    // Hortizental Progress bar Y Dimension
+                    Container(
+                        width: double.infinity,
+                        height: 5,
+                        padding: const EdgeInsets.symmetric(horizontal: 60),
+                        child: LinearProgressIndicator(
+                            value: widget.yProgressBar.value,
+                            backgroundColor: Colors.blue.withOpacity(0.2),
+                            valueColor: AlwaysStoppedAnimation(
+                              widget.yProgressBar.value >= 0.9
+                                  ? Colors.green
+                                  : Colors.blue,
+                            ))),
+                  ],
+                ),
+              ),
             ),
           )
+          //////////////////////////
         ],
       ),
     );
